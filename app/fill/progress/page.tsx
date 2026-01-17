@@ -12,6 +12,7 @@ export default function ProgressPage() {
     distributions,
     responseCount,
     locale,
+    skipOptionalQuestions,
     updateProgress,
     progress,
     setResult,
@@ -59,6 +60,8 @@ export default function ProgressPage() {
               responseIndex: i,
               isPublishedForm: form.isPublishedForm,
               locale,
+              pageHistory: form.pageHistory || [0],
+              skipOptionalQuestions,
             }),
           });
 

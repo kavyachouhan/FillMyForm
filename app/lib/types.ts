@@ -53,6 +53,7 @@ export interface ParsedForm {
   requiresSignIn?: boolean;
   hasFileUpload?: boolean;
   skippedQuestions?: ParsedQuestion[];
+  pageHistory: number[]; // Array of page IDs for multi-page forms
 }
 
 // Faker locale types and options

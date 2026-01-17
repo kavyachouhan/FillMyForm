@@ -14,6 +14,7 @@ interface FormState {
   distributions: QuestionDistribution[];
   responseCount: number;
   locale: FakerLocale;
+  skipOptionalQuestions: boolean;
   progress: SubmissionProgress;
   result: SubmissionResult | null;
 }
@@ -23,6 +24,7 @@ interface FormContextType extends FormState {
   setDistributions: (distributions: QuestionDistribution[]) => void;
   setResponseCount: (count: number) => void;
   setLocale: (locale: FakerLocale) => void;
+  setSkipOptionalQuestions: (skip: boolean) => void;
   updateProgress: (progress: Partial<SubmissionProgress>) => void;
   setResult: (result: SubmissionResult | null) => void;
   reset: () => void;
@@ -45,6 +47,7 @@ export function FormProvider({ children }: { children: ReactNode }) {
   );
   const [responseCount, setResponseCount] = useState(10);
   const [locale, setLocale] = useState<FakerLocale>("en");
+  const [skipOptionalQuestions, setSkipOptionalQuestions] = useState(false);
   const [progress, setProgress] = useState<SubmissionProgress>(initialProgress);
   const [result, setResult] = useState<SubmissionResult | null>(null);
 
@@ -57,6 +60,7 @@ export function FormProvider({ children }: { children: ReactNode }) {
     setDistributions([]);
     setResponseCount(10);
     setLocale("en");
+    setSkipOptionalQuestions(false);
     setProgress(initialProgress);
     setResult(null);
   };
@@ -68,12 +72,14 @@ export function FormProvider({ children }: { children: ReactNode }) {
         distributions,
         responseCount,
         locale,
+        skipOptionalQuestions,
         progress,
         result,
         setForm,
         setDistributions,
         setResponseCount,
         setLocale,
+        setSkipOptionalQuestions,
         updateProgress,
         setResult,
         reset,

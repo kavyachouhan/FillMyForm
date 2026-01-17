@@ -29,6 +29,8 @@ export default function ConfigurePage() {
     setResponseCount,
     locale,
     setLocale,
+    skipOptionalQuestions,
+    setSkipOptionalQuestions,
   } = useFormContext();
   const [expandedQuestions, setExpandedQuestions] = useState<Set<string>>(
     new Set()
@@ -179,6 +181,25 @@ export default function ConfigurePage() {
               </option>
             ))}
           </select>
+        </div>
+
+        <div className="mb-4 sm:mb-6">
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={skipOptionalQuestions}
+              onChange={(e) => setSkipOptionalQuestions(e.target.checked)}
+              className="w-5 h-5 text-blue-600 border-slate-300 rounded focus:ring-blue-500 cursor-pointer"
+            />
+            <div>
+              <span className="text-sm font-medium text-slate-700">
+                Skip optional questions
+              </span>
+              <p className="text-xs text-slate-500">
+                Leave non-required questions blank in generated responses
+              </p>
+            </div>
+          </label>
         </div>
       </div>
 

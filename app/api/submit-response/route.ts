@@ -14,6 +14,8 @@ interface SubmitRequestBody {
   responseIndex: number;
   isPublishedForm: boolean;
   locale: FakerLocale;
+  pageHistory: number[]; // Array of page IDs for the form
+  skipOptionalQuestions: boolean; // Whether to skip optional questions
 }
 
 // Create a Faker instance with the specified locale
@@ -244,7 +246,9 @@ function applyDistribution(
 function buildPayload(
   questions: ParsedQuestion[],
   distributions: QuestionDistribution[],
-  faker: Faker
+  faker: Faker,
+  pageHistory: number[],
+  skipOptionalQuestions: boolean
 ): URLSearchParams {
   const params = new URLSearchParams();
 
@@ -252,6 +256,11 @@ function buildPayload(
   personData = null;
 
   for (const question of questions) {
+    // Skip optional questions if the setting is enabled
+    if (skipOptionalQuestions && !question.required) {
+      continue;
+    }
+
     const dist = distributions.find((d) => d.questionId === question.id);
     const answer = generateAnswer(question, dist, faker);
 
@@ -262,6 +271,12 @@ function buildPayload(
     } else if (answer) {
       params.append(question.entryId, answer);
     }
+  }
+
+  // Add pageHistory parameter for multi-page forms
+  // This tells Google Forms that all pages have been visited
+  if (pageHistory.length > 1) {
+    params.append("pageHistory", pageHistory.join(","));
   }
 
   return params;
@@ -277,6 +292,8 @@ export async function POST(request: NextRequest) {
       responseIndex,
       isPublishedForm,
       locale,
+      pageHistory,
+      skipOptionalQuestions,
     } = body;
 
     if (!formId || !questions || questions.length === 0) {
@@ -298,7 +315,7 @@ export async function POST(request: NextRequest) {
       ? `https://docs.google.com/forms/d/e/${formId}/viewform`
       : `https://docs.google.com/forms/d/${formId}/viewform`;
 
-    const payload = buildPayload(questions, distributions || [], faker);
+    const payload = buildPayload(questions, distributions || [], faker, pageHistory || [0], skipOptionalQuestions || false);
 
     const response = await fetch(submitUrl, {
       method: "POST",
@@ -310,6 +327,13 @@ export async function POST(request: NextRequest) {
       },
       body: payload,
     });
+
+    // Log response for debugging
+    const responseText = await response.text();
+    console.log("Response status:", response.status);
+    if (!response.ok) {
+      console.log("Response body (first 500 chars):", responseText.substring(0, 500));
+    }
 
     // Consider submission successful if response is OK or a redirect
     const success = response.ok || response.status === 302;

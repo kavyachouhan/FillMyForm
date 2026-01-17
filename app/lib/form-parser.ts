@@ -172,11 +172,15 @@ export function parseFormData(fbData: unknown[]): ParsedForm | null {
     // fbData structure:
     // [0]: metadata
     // [1]: form info array
+    //   [0]: form description
+    //   [1]: items array (can contain questions directly or page structures)
+    //   [8]: form title
+    //   [14]: form ID
 
     const formInfo = fbData[1] as unknown[];
-    const questionsArray = formInfo?.[1] as unknown[][] | undefined;
+    const itemsArray = formInfo?.[1] as unknown[][] | undefined;
 
-    if (!formInfo || !questionsArray) {
+    if (!formInfo || !itemsArray) {
       return null;
     }
 
@@ -186,16 +190,65 @@ export function parseFormData(fbData: unknown[]): ParsedForm | null {
 
     const questions: ParsedQuestion[] = [];
     const skippedQuestions: ParsedQuestion[] = [];
+    const pageHistory: number[] = [0]; // Start with page 0 (first page)
 
-    for (const questionData of questionsArray) {
-      if (!questionData || !Array.isArray(questionData)) continue;
+    // Process each item in the form
+    // Items can be:
+    // 1. Direct questions (single-page forms)
+    // 2. Page break/section headers
+    // 3. Page structures containing questions (multi-page forms)
+    for (const itemData of itemsArray) {
+      if (!itemData || !Array.isArray(itemData)) continue;
 
-      const result = parseQuestionData(questionData);
-      if (result.question) {
-        questions.push(result.question);
+      // Check if this is a page break/section header
+      // A section header has:
+      // - A title at index 1 (section name)
+      // - Navigation info at index 11
+      // - NO question entry data (index 4 is null or doesn't have entry structure)
+      const hasNavigation = itemData[11] as unknown[] | undefined;
+      const entryData = itemData[4] as unknown[] | undefined;
+      const hasTitle = typeof itemData[1] === 'string' && itemData[1].length > 0;
+      
+      // It's a section break if it has navigation AND either no entry data 
+      // or entry data doesn't look like a question (no entry ID at [4][0][0])
+      const isQuestionEntry = entryData && 
+        Array.isArray(entryData) && 
+        entryData.length > 0 && 
+        Array.isArray(entryData[0]) && 
+        typeof (entryData[0] as unknown[])[0] === 'number';
+      
+      if (hasNavigation && Array.isArray(hasNavigation) && !isQuestionEntry) {
+        // This is a section/page break - add the page index
+        pageHistory.push(pageHistory.length);
+        continue; // Skip to next item, this is just a section header
       }
-      if (result.skipped) {
-        skippedQuestions.push(result.skipped);
+
+      // First, try to parse as a direct question (single-page form structure)
+      const directResult = parseQuestionData(itemData);
+      if (directResult.question) {
+        questions.push(directResult.question);
+        continue;
+      }
+      if (directResult.skipped) {
+        skippedQuestions.push(directResult.skipped);
+        continue;
+      }
+
+      // Check if this item has nested question content at index 4
+      // This happens with sections/pages where questions are nested inside
+      const nestedContent = itemData[4] as unknown[][] | undefined;
+      if (nestedContent && Array.isArray(nestedContent)) {
+        for (const nestedItem of nestedContent) {
+          if (!nestedItem || !Array.isArray(nestedItem)) continue;
+          
+          const nestedResult = parseQuestionData(nestedItem as unknown[]);
+          if (nestedResult.question) {
+            questions.push(nestedResult.question);
+          }
+          if (nestedResult.skipped) {
+            skippedQuestions.push(nestedResult.skipped);
+          }
+        }
       }
     }
 
@@ -208,6 +261,7 @@ export function parseFormData(fbData: unknown[]): ParsedForm | null {
         skippedQuestions.length > 0 ? skippedQuestions : undefined,
       hasFileUpload: skippedQuestions.length > 0,
       isPublishedForm: false, // To be determined by URL/form ID
+      pageHistory,
     };
   } catch {
     return null;

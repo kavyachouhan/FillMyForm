@@ -1,36 +1,95 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FillMyForm
 
-## Getting Started
+Generate realistic test responses for Google Forms quickly and easily.
 
-First, run the development server:
+🌐 **Live Demo:** [https://www.fillmyform.xyz](https://www.fillmyform.xyz)
+
+## ✨ Features
+
+- **Realistic Data Generation** - Create authentic-looking responses with names, emails, demographics using region-specific data powered by Faker.js
+- **Custom Distributions** - Control response patterns with flexible distributions (random, balanced, or skewed)
+- **Bulk Generation** - Generate up to 100 responses instantly
+- **Smart Question Support** - Handles multiple choice, checkboxes, dropdowns, linear scales, text fields, grids, dates, times, and more
+- **Multi-language Support** - Generate data in 18+ locales including English, German, French, Spanish, Japanese, Chinese, and more
+- **Instant Submission** - Responses are submitted directly to your Google Form
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- pnpm (recommended) or npm
+
+### Installation
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+# Clone the repository
+git clone https://github.com/yourusername/fillmyform.git
+cd fillmyform
+
+# Install dependencies
+pnpm install
+
+# Run the development server
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Create a `.env.local` file in the root directory if you need to configure any environment variables.
 
-## Learn More
+## 🛠️ Tech Stack
 
-To learn more about Next.js, take a look at the following resources:
+- **Framework:** [Next.js 16](https://nextjs.org) with App Router
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS 4
+- **Data Generation:** [Faker.js](https://fakerjs.dev)
+- **Icons:** Lucide React
+- **Analytics:** Vercel Analytics
+- **Backend:** Appwrite
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📁 Project Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+app/
+├── api/
+│   ├── log-form/        # Form logging endpoint
+│   ├── parse-form/      # Google Form parser
+│   └── submit-response/ # Response submission
+├── components/          # Landing page components
+├── fill/
+│   ├── configure/       # Configure response settings
+│   ├── progress/        # Submission progress view
+│   └── result/          # Results summary
+├── lib/
+│   ├── form-context.tsx # React context for form state
+│   ├── form-parser.ts   # Google Form parsing logic
+│   └── types.ts         # TypeScript definitions
+├── privacy/             # Privacy policy page
+└── terms/               # Terms of service page
+```
 
-## Deploy on Vercel
+## 🎯 Use Cases
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Test Analytics** - Validate dashboards and data visualization tools
+- **Verify Logic** - Test form branching and conditional questions
+- **Research Data** - Create pilot datasets for academic projects
+- **QA Testing** - Generate test data for form validation
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## ⚠️ Disclaimer
+
+FillMyForm is intended for academic and testing purposes only. We do not promote or condone fraudulent activity. Users are solely responsible for ensuring their use complies with applicable policies and regulations.
+
+## 📝 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/yourusername/fillmyform/issues).
+
+---
+
+Made with ❤️ for researchers, students, and data analysts
