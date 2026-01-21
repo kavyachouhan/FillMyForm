@@ -1,4 +1,4 @@
-import { ParsedForm, ParsedQuestion, QuestionType } from "./types";
+import { ParsedForm, ParsedQuestion, QuestionType, QuestionValidation, ValidationType } from "./types";
 
 // Mapping of Google Forms question type codes to our QuestionType
 const QUESTION_TYPE_MAP: Record<number, QuestionType> = {
@@ -14,6 +14,144 @@ const QUESTION_TYPE_MAP: Record<number, QuestionType> = {
   10: "time",
   13: "file_upload",
 };
+
+// Mapping of Google Forms validation type codes
+// Google Forms validation structure can vary:
+// - entryData[0][4][0] contains the validation rule array
+// - Or validation can be at entryData[0][4] directly
+const VALIDATION_TYPE_MAP: Record<number, Record<number, ValidationType>> = {
+  // Number validations (type 1)
+  1: {
+    1: "greater_than",
+    2: "greater_equal",
+    3: "less_than",
+    4: "less_equal",
+    5: "equal",
+    6: "not_equal",
+    7: "between",
+    8: "not_between",
+    9: "is_number",
+    10: "whole_number",
+  },
+  // Text validations (type 2)
+  2: {
+    1: "contains",
+    2: "not_contains",
+    3: "email",
+    4: "url",
+  },
+  // Length validations (type 3)
+  3: {
+    1: "length_max",
+    2: "length_min",
+    3: "length_equal",
+  },
+  // Regex validations (type 4)
+  4: {
+    1: "regex",
+    2: "regex", // "Does not match" regex - treat same as regex
+  },
+  // Checkbox count validations (type 200)
+  200: {
+    1: "checkbox_min",
+    2: "checkbox_max",
+    3: "checkbox_exact",
+  },
+};
+
+// Helper to extract validation from a rule array
+function extractValidationFromRule(validationRule: unknown[], errorMessage?: string): QuestionValidation | undefined {
+  if (!validationRule || !Array.isArray(validationRule) || validationRule.length < 2) {
+    return undefined;
+  }
+  
+  const validationCategory = validationRule[0] as number;
+  const validationOperator = validationRule[1] as number;
+  const primaryValue = validationRule[2];
+  const secondaryValue = validationRule[3];
+  
+  const typeMap = VALIDATION_TYPE_MAP[validationCategory];
+  if (!typeMap) return undefined;
+  
+  const validationType = typeMap[validationOperator];
+  if (!validationType) return undefined;
+  
+  const validation: QuestionValidation = {
+    type: validationType,
+  };
+  
+  // Add values based on validation type
+  if (primaryValue !== undefined && primaryValue !== null) {
+    validation.value = primaryValue as number | string;
+  }
+  
+  if (secondaryValue !== undefined && secondaryValue !== null && 
+      (validationType === "between" || validationType === "not_between")) {
+    validation.value2 = secondaryValue as number | string;
+  }
+  
+  if (errorMessage) {
+    validation.errorMessage = errorMessage;
+  }
+  
+  return validation;
+}
+
+function parseValidation(entryData: unknown[]): QuestionValidation | undefined {
+  try {
+    // Validation data can be at different locations depending on the form structure
+    const firstEntry = entryData[0] as unknown[];
+    if (!firstEntry || !Array.isArray(firstEntry)) return undefined;
+    
+    // Check at index 4 for validation data
+    const validationData = firstEntry[4] as unknown[];
+    if (!validationData || !Array.isArray(validationData) || validationData.length === 0) {
+      return undefined;
+    }
+    
+    // Get the custom error message - can be at different locations
+    let errorMessage: string | undefined;
+    
+    // Structure 1: validationData[0] is the rule array, validationData[1] is error message
+    // Structure 2: validationData itself is the rule array
+    // Structure 3: validationData contains nested arrays
+    
+    // First, check if validationData[0] looks like a validation rule (first element is a number category)
+    const firstElement = validationData[0];
+    
+    if (typeof firstElement === 'number') {
+      // This means validationData IS the rule itself
+      return extractValidationFromRule(validationData, undefined);
+    }
+    
+    if (Array.isArray(firstElement)) {
+      // validationData[0] is the rule array
+      // Check for error message at validationData[1]
+      if (validationData[1] && typeof validationData[1] === 'string') {
+        errorMessage = validationData[1];
+      }
+      return extractValidationFromRule(firstElement as unknown[], errorMessage);
+    }
+    
+    // Try to find validation rule in nested structure
+    for (let i = 0; i < validationData.length; i++) {
+      const item = validationData[i];
+      if (Array.isArray(item) && typeof item[0] === 'number') {
+        // Found a rule-like array
+        // Check next item for error message
+        const nextItem = validationData[i + 1];
+        if (typeof nextItem === 'string') {
+          errorMessage = nextItem;
+        }
+        return extractValidationFromRule(item as unknown[], errorMessage);
+      }
+    }
+    
+    return undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 function extractFormIdFromUrl(url: string): string | null {
   // Trim whitespace from the URL
@@ -94,6 +232,12 @@ function parseQuestionData(questionData: unknown[]): ParseQuestionResult {
       type,
       required,
     };
+
+    // Parse validation rules if present
+    const validation = parseValidation(entryData);
+    if (validation) {
+      question.validation = validation;
+    }
 
     // Parse options for relevant question types
     if (

@@ -30,6 +30,38 @@ export interface ScaleQuestion {
   maxLabel?: string;
 }
 
+// Validation types for form questions
+export type ValidationType =
+  | "number"           // Must be a number
+  | "greater_than"     // Greater than X
+  | "greater_equal"    // Greater than or equal to X
+  | "less_than"        // Less than X
+  | "less_equal"       // Less than or equal to X
+  | "equal"            // Equal to X
+  | "not_equal"        // Not equal to X
+  | "between"          // Between X and Y
+  | "not_between"      // Not between X and Y
+  | "is_number"        // Is a number
+  | "whole_number"     // Is a whole number
+  | "length_max"       // Maximum character count
+  | "length_min"       // Minimum character count
+  | "length_equal"     // Exact character count
+  | "contains"         // Contains text
+  | "not_contains"     // Does not contain text
+  | "email"            // Is a valid email
+  | "url"              // Is a valid URL
+  | "regex"            // Matches regular expression
+  | "checkbox_min"     // Minimum selections
+  | "checkbox_max"     // Maximum selections
+  | "checkbox_exact";  // Exact number of selections
+
+export interface QuestionValidation {
+  type: ValidationType;
+  value?: number | string;      // Primary value (e.g., max number, min length)
+  value2?: number | string;     // Secondary value (e.g., for "between" validation)
+  errorMessage?: string;        // Custom error message from the form
+}
+
 export interface ParsedQuestion {
   id: string;
   entryId: string;
@@ -40,6 +72,7 @@ export interface ParsedQuestion {
   options?: QuestionOption[];
   scale?: ScaleQuestion;
   grid?: GridQuestion;
+  validation?: QuestionValidation;
   skipped?: boolean;
   skipReason?: string;
 }

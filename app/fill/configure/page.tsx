@@ -17,7 +17,38 @@ import {
   AlertTriangle,
   Globe,
   Upload,
+  ShieldCheck,
 } from "lucide-react";
+import { ValidationType } from "@/app/lib/types";
+
+// Helper to format validation type for display
+function formatValidationType(type: ValidationType): string {
+  const labels: Record<ValidationType, string> = {
+    number: "Number",
+    greater_than: "Greater than",
+    greater_equal: "At least",
+    less_than: "Less than",
+    less_equal: "At most",
+    equal: "Equal to",
+    not_equal: "Not equal to",
+    between: "Between",
+    not_between: "Not between",
+    is_number: "Must be a number",
+    whole_number: "Whole number",
+    length_max: "Max length",
+    length_min: "Min length",
+    length_equal: "Exact length",
+    contains: "Must contain",
+    not_contains: "Must not contain",
+    email: "Valid email",
+    url: "Valid URL",
+    regex: "Pattern match",
+    checkbox_min: "Min selections",
+    checkbox_max: "Max selections",
+    checkbox_exact: "Exact selections",
+  };
+  return labels[type] || type;
+}
 
 export default function ConfigurePage() {
   const router = useRouter();
@@ -285,6 +316,21 @@ export default function ConfigurePage() {
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     <QuestionTypeBadge type={question.type} />
+                    {question.validation && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">
+                        <ShieldCheck className="h-3 w-3" />
+                        {formatValidationType(question.validation.type)}
+                        {question.validation.value !== undefined && (
+                          <span>
+                            {" "}
+                            {question.validation.value}
+                            {question.validation.value2 !== undefined && (
+                              <span> - {question.validation.value2}</span>
+                            )}
+                          </span>
+                        )}
+                      </span>
+                    )}
                     <span className="text-xs text-slate-400 truncate">
                       {question.entryId}
                     </span>
@@ -333,6 +379,37 @@ export default function ConfigurePage() {
                           {question.scale.maxLabel || question.scale.max}
                         </span>
                       </div>
+                    </div>
+                  )}
+
+                  {question.validation && (
+                    <div className="mb-4">
+                      <p className="text-xs sm:text-sm font-medium text-slate-700 mb-2">
+                        Validation
+                      </p>
+                      <div className="flex items-center gap-2 text-xs sm:text-sm text-green-700 bg-green-50 rounded-lg p-2">
+                        <ShieldCheck className="h-4 w-4 shrink-0" />
+                        <span>
+                          {formatValidationType(question.validation.type)}
+                          {question.validation.value !== undefined && (
+                            <span className="font-medium">
+                              {" "}
+                              {question.validation.value}
+                              {question.validation.value2 !== undefined && (
+                                <span> - {question.validation.value2}</span>
+                              )}
+                            </span>
+                          )}
+                          {question.validation.errorMessage && (
+                            <span className="block text-slate-500 mt-1">
+                              Error: {question.validation.errorMessage}
+                            </span>
+                          )}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 mt-1">
+                        Generated values will respect this validation rule
+                      </p>
                     </div>
                   )}
 
