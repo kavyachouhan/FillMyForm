@@ -2,9 +2,9 @@
 
 Generate realistic test responses for Google Forms quickly and easily.
 
-🌐 **Live Demo:** [https://www.fillmyform.xyz](https://www.fillmyform.xyz)
+**Website:** [https://www.fillmyform.xyz](https://www.fillmyform.xyz)
 
-## ✨ Features
+## Features
 
 - **Realistic Data Generation** - Create authentic-looking responses with names, emails, demographics using region-specific data powered by Faker.js
 - **Custom Distributions** - Control response patterns with flexible distributions (random, balanced, or skewed)
@@ -13,7 +13,7 @@ Generate realistic test responses for Google Forms quickly and easily.
 - **Multi-language Support** - Generate data in 18+ locales including English, German, French, Spanish, Japanese, Chinese, and more
 - **Instant Submission** - Responses are submitted directly to your Google Form
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -24,23 +24,24 @@ Generate realistic test responses for Google Forms quickly and easily.
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/fillmyform.git
+git clone https://github.com/kavyachouhan/fillmyform.git
 cd fillmyform
 
 # Install dependencies
 pnpm install
 
 # Run the development server
-pnpm dev
+pnpm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to view the app.
 
 ### Environment Variables
 
-Create a `.env.local` file in the root directory if you need to configure any environment variables.
+Create a `.env.local` file in the root directory and copy the contents of `.env.example`. Fill in the required Appwrite configuration values.
+```
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Framework:** [Next.js 16](https://nextjs.org) with App Router
 - **Language:** TypeScript
@@ -50,7 +51,7 @@ Create a `.env.local` file in the root directory if you need to configure any en
 - **Analytics:** Vercel Analytics
 - **Backend:** Appwrite
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 app/
@@ -71,24 +72,23 @@ app/
 └── terms/               # Terms of service page
 ```
 
-## 🎯 Use Cases
+## Use Cases
 
 - **Test Analytics** - Validate dashboards and data visualization tools
 - **Verify Logic** - Test form branching and conditional questions
 - **Research Data** - Create pilot datasets for academic projects
 - **QA Testing** - Generate test data for form validation
 
-## ⚠️ Disclaimer
+## Disclaimer
 
 FillMyForm is intended for academic and testing purposes only. We do not promote or condone fraudulent activity. Users are solely responsible for ensuring their use complies with applicable policies and regulations.
 
-## 📝 License
-
+## License
 This project is open source and available under the [MIT License](LICENSE).
 
-## 🤝 Contributing
+## Contributing
 
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/yourusername/fillmyform/issues).
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/kavyachouhan/fillmyform/issues).
 
 ---
 
