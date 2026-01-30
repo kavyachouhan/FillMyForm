@@ -18,8 +18,13 @@ export interface QuestionOption {
   label: string;
 }
 
+export interface GridRow {
+  label: string;
+  entryId: string;
+}
+
 export interface GridQuestion {
-  rows: string[];
+  rows: GridRow[];
   columns: string[];
 }
 
@@ -87,6 +92,7 @@ export interface ParsedForm {
   hasFileUpload?: boolean;
   skippedQuestions?: ParsedQuestion[];
   pageHistory: number[]; // Array of page IDs for multi-page forms
+  fbzx?: string; // Hidden form token required for submission
 }
 
 // Faker locale types and options

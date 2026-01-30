@@ -274,17 +274,18 @@ function parseQuestionData(questionData: unknown[]): ParseQuestionResult {
     }
 
     if (type === "multiple_choice_grid" || type === "checkbox_grid") {
-      // entryData contains rows and columns
-      const rows: string[] = [];
+      // Extract rows and columns
+      const rows: { label: string; entryId: string }[] = [];
       const columns: string[] = [];
 
       for (const entry of entryData as unknown[][]) {
         if (entry && Array.isArray(entry)) {
           // Rows are in the first element
+          const rowEntryId = `entry.${entry[0]}`;
           const entryLabelData = entry[3] as unknown[] | undefined;
           const rowLabel =
             (entryLabelData?.[0] as string) || `Row ${rows.length + 1}`;
-          rows.push(rowLabel);
+          rows.push({ label: rowLabel, entryId: rowEntryId });
 
           // Columns are in the second element
           if (columns.length === 0 && entry[1]) {

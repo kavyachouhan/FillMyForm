@@ -122,6 +122,17 @@ export async function POST(request: NextRequest) {
       /FB_PUBLIC_LOAD_DATA_\s*=\s*([\s\S]*?);\s*<\/script>/
     );
 
+    // Extract fbzx token if present
+    let fbzx: string | undefined;
+    const fbzxMatch = html.match(/name="fbzx"\s+value="([^"]+)"/)
+      || html.match(/"fbzx":"([^"]+)"/)
+      || html.match(/fbzx=(-?[\d]+)/);
+    if (fbzxMatch) {
+      fbzx = fbzxMatch[1];
+    }
+    
+    console.log("Extracted fbzx:", fbzx);
+
     if (!fbDataMatch) {
       // Check for sign-in requirement
       if (html.includes("accounts.google.com") || html.includes("Sign in")) {
@@ -173,6 +184,7 @@ export async function POST(request: NextRequest) {
     // Set additional form properties
     parsedForm.formId = formId;
     parsedForm.isPublishedForm = isPublishedForm;
+    parsedForm.fbzx = fbzx;
 
     if (parsedForm.questions.length === 0) {
       return NextResponse.json(

@@ -62,6 +62,7 @@ export default function ProgressPage() {
               locale,
               pageHistory: form.pageHistory || [0],
               skipOptionalQuestions,
+              fbzx: form.fbzx,
             }),
           });
 

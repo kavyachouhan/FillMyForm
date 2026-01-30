@@ -17,6 +17,7 @@ interface SubmitRequestBody {
   locale: FakerLocale;
   pageHistory: number[]; // Array of page IDs for the form
   skipOptionalQuestions: boolean; // Whether to skip optional questions
+  fbzx?: string; // Form submission token
 }
 
 // Create a Faker instance with the specified locale
@@ -687,7 +688,8 @@ function buildPayload(
   distributions: QuestionDistribution[],
   faker: Faker,
   pageHistory: number[],
-  skipOptionalQuestions: boolean
+  skipOptionalQuestions: boolean,
+  fbzx?: string
 ): URLSearchParams {
   const params = new URLSearchParams();
 
@@ -697,6 +699,19 @@ function buildPayload(
   for (const question of questions) {
     // Skip optional questions if the setting is enabled
     if (skipOptionalQuestions && !question.required) {
+      continue;
+    }
+
+    // Handle grid questions separately
+    if ((question.type === "multiple_choice_grid" || question.type === "checkbox_grid") && question.grid) {
+      const columns = question.grid.columns;
+      for (const row of question.grid.rows) {
+        // Generate answer for each row
+        if (columns.length > 0) {
+          const selectedColumn = columns[Math.floor(Math.random() * columns.length)];
+          params.append(row.entryId, selectedColumn);
+        }
+      }
       continue;
     }
 
@@ -710,12 +725,24 @@ function buildPayload(
     } else if (answer) {
       params.append(question.entryId, answer);
     }
+    
+    // Handle sentinel fields for certain question types
+    if (question.type === "multiple_choice" || question.type === "checkbox" || question.type === "dropdown") {
+      const sentinelId = question.entryId + "_sentinel";
+      params.append(sentinelId, "");
+    }
   }
 
-  // Add pageHistory parameter for multi-page forms
-  // This tells Google Forms that all pages have been visited
-  if (pageHistory.length > 1) {
-    params.append("pageHistory", pageHistory.join(","));
+  // Page history for multi-page forms
+  params.append("pageHistory", pageHistory.join(","));
+  
+  // Required hidden fields for Google Forms
+  params.append("fvv", "1");
+  
+  // Append fbzx if provided
+  if (fbzx) {
+    params.append("fbzx", fbzx);
+    params.append("partialResponse", `[null,null,"${fbzx}"]`);
   }
 
   return params;
@@ -733,6 +760,7 @@ export async function POST(request: NextRequest) {
       locale,
       pageHistory,
       skipOptionalQuestions,
+      fbzx,
     } = body;
 
     if (!formId || !questions || questions.length === 0) {
@@ -754,7 +782,7 @@ export async function POST(request: NextRequest) {
       ? `https://docs.google.com/forms/d/e/${formId}/viewform`
       : `https://docs.google.com/forms/d/${formId}/viewform`;
 
-    const payload = buildPayload(questions, distributions || [], faker, pageHistory || [0], skipOptionalQuestions || false);
+    const payload = buildPayload(questions, distributions || [], faker, pageHistory || [0], skipOptionalQuestions || false, fbzx);
 
     const response = await fetch(submitUrl, {
       method: "POST",
@@ -769,7 +797,6 @@ export async function POST(request: NextRequest) {
 
     // Log response for debugging
     const responseText = await response.text();
-    console.log("Response status:", response.status);
     if (!response.ok) {
       console.log("Response body (first 500 chars):", responseText.substring(0, 500));
     }
