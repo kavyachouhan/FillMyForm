@@ -37,7 +37,7 @@ pnpm run dev
 Open [http://localhost:3000](http://localhost:3000) to view the app.
 
 ### Environment Variables
-
+```
 Create a `.env.local` file in the root directory and copy the contents of `.env.example`. Fill in the required Appwrite configuration values.
 ```
 

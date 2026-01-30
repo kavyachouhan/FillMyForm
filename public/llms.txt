@@ -1,0 +1,39 @@
+# FillMyForm
+
+> FillMyForm is an automated tool that helps users fill out Google Forms quickly and efficiently with customizable response distributions.
+
+## About
+
+FillMyForm is a web application that parses Google Forms and allows users to automatically submit multiple responses with configurable answer distributions. It's designed for researchers, educators, and anyone who needs to collect form data efficiently.
+
+## Features
+
+- Parse any public Google Form by URL
+- Configure custom response distributions for each question
+- Support for multiple question types (multiple choice, checkboxes, short answer, etc.)
+- Real-time progress tracking
+- Privacy-focused - no data stored on servers
+
+## Pages
+
+- `/` - Home page with feature overview and how it works
+- `/fill` - Start filling a form by entering the Google Form URL
+- `/fill/configure` - Configure response distributions for each question
+- `/fill/progress` - View real-time submission progress
+- `/fill/result` - View submission results
+- `/privacy` - Privacy policy
+- `/terms` - Terms of service
+
+## API Endpoints
+
+- `POST /api/parse-form` - Parse a Google Form URL and extract questions
+- `POST /api/submit-response` - Submit a single form response
+- `POST /api/log-form` - Log form submission data
+
+## Contact
+
+For questions or support, please visit our website.
+
+## License
+
+This project is open source. See the LICENSE file for details.
